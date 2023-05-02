@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("SampleDB");
+var connectionString = builder.Configuration.GetConnectionString("DataBase");
 builder.Services.AddDbContext<Context>(opt => opt.UseSqlServer(connectionString));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();

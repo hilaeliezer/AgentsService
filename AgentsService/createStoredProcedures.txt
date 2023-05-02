@@ -1,0 +1,46 @@
+﻿CREATE PROCEDURE SelectAgentHighestAmount @Year nvarchar(30)
+AS
+
+select  top 1  o.AGENT_CODE 
+from  [SampleDB].[dbo].[ORDERS] o
+WHERE YEAR(o.ORD_DATE) = @Year
+  AND MONTH(o.ORD_DATE) BETWEEN '01' AND '03'
+group by o.AGENT_CODE
+order by sum(o.ADVANCE_AMOUNT) desc
+
+GO
+
+
+
+CREATE PROCEDURE SelectNthAgentOrder @Agents_list nvarchar(2000), @Num nvarchar(30)
+AS
+
+SET NOCOUNT ON;
+WITH added_row_number AS (
+  SELECT
+    *,
+    ROW_NUMBER() OVER(PARTITION BY  o.AGENT_CODE ORDER BY o.ORD_DATE ) AS row_number
+  FROM  [SampleDB].[dbo].[ORDERS] o
+  where o.AGENT_CODE in (SELECT value FROM STRING_SPLIT(@Agents_list, ','))
+)
+SELECT
+  *
+FROM added_row_number
+WHERE row_number = @Num  ;
+
+GO
+
+
+CREATE PROCEDURE  SelectAgentsYearNOrders  @Num nvarchar(30), @Year nvarchar(30)
+AS
+
+ select a.AGENT_CODE,a.AGENT_NAME,a.PHONE_NO     
+  FROM [SampleDB].[dbo].[AGENTS] a 
+  where a.AGENT_CODE in ( select o.AGENT_CODE
+  FROM  [SampleDB].[dbo].ORDERS o
+  
+  where YEAR( o.ORD_DATE)=@Year
+  group by o.AGENT_CODE
+  having  count(o.ORD_NUM)>=@Num)
+
+GO
